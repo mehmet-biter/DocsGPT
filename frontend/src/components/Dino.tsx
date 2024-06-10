@@ -11,7 +11,7 @@ interface Position {
 const GRAVITY = 1;
 const JUMP_STRENGTH = 20;
 const MOVE_DISTANCE = 10; // Distance to move left or right
-const GROUND_LEVEL = window.innerHeight - 50; // Adjust this according to the size of your character or screen
+const GROUND_LEVEL = window.innerHeight - 30; // Adjust this according to the size of your character or screen
 
 const Dino: React.FC = () => {
   const [position, setPosition] = useState<Position>({

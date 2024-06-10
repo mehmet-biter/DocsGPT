@@ -19,6 +19,9 @@ import { FEEDBACK, Query } from './conversationModels';
 import { sendFeedback } from './conversationApi';
 import { useTranslation } from 'react-i18next';
 import ArrowDown from './../assets/arrow-down.svg';
+import Dino from '../components/Dino';
+
+const dinoMode = import.meta.env.DINO_MODE || false;
 export default function Conversation() {
   const queries = useSelector(selectQueries);
   const status = useSelector(selectStatus);
@@ -217,6 +220,7 @@ export default function Conversation() {
           {t('tagline')}
         </p>
       </div>
+      {status === 'loading' && dinoMode ? <Dino /> : null}
     </div>
   );
 }

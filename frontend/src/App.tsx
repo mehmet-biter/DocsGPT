@@ -8,7 +8,6 @@ import { useMediaQuery } from './hooks';
 import { useState } from 'react';
 import Setting from './settings';
 import './locale/i18n';
-import Dino from './components/Dino';
 
 inject();
 
@@ -17,7 +16,6 @@ export default function App() {
   const [navOpen, setNavOpen] = useState(!isMobile);
   return (
     <div className="min-h-full min-w-full dark:bg-raisin-black">
-      <Dino />
       <Navigation navOpen={navOpen} setNavOpen={setNavOpen} />
       <div
         className={`transition-all duration-200 ${
