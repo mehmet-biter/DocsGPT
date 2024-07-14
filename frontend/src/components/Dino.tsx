@@ -42,7 +42,12 @@ const Ball: React.FC<BallProps> = ({ onCollision, dinoRef }) => {
           left: newPosition.left,
         };
         if (checkCollision(ballRect, dinoRect)) {
-          newVelocity.y = -Math.abs(newVelocity.y) * 1.5;
+          let randomFactor = Math.random() * 0.5 + 0.5;
+          newVelocity.y = -Math.abs(newVelocity.y + randomFactor + 1) * 1.5;
+          if (newVelocity.x < 0) {
+            randomFactor = -randomFactor;
+          }
+          newVelocity.x = newVelocity.x + randomFactor;
           onCollision();
         }
       }
@@ -153,20 +158,22 @@ const Dino: React.FC = () => {
       const newPos = { ...prev };
       newPos.top += newPos.velocityY;
       newPos.velocityY += GRAVITY;
-
       if (keyStates.current['a']) {
-        moveLeft();
+        newPos.left = Math.max(newPos.left - MOVE_DISTANCE, 0);
+        setFacingRight(false);
       }
       if (keyStates.current['d']) {
-        moveRight();
+        newPos.left = Math.min(
+          newPos.left + MOVE_DISTANCE,
+          window.innerWidth - 50,
+        );
+        setFacingRight(true);
       }
-
       if (newPos.top >= GROUND_LEVEL) {
         newPos.top = GROUND_LEVEL;
         newPos.velocityY = 0;
         isJumpingRef.current = false;
       }
-
       return newPos;
     });
   };
@@ -185,18 +192,10 @@ const Dino: React.FC = () => {
     if (event.key === 'w') {
       startJump();
     }
-    if (event.key === 'a' || event.key === 'd') {
-      setIsMoving(true);
-    }
   };
 
   const handleKeyUp = (event: KeyboardEvent): void => {
     keyStates.current[event.key] = false;
-    if (event.key === 'a' || event.key === 'd') {
-      if (!keyStates.current['a'] && !keyStates.current['d']) {
-        setIsMoving(false);
-      }
-    }
   };
 
   useEffect(() => {
