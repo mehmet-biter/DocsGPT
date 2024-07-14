@@ -3,12 +3,14 @@ import dinoGif from '../assets/dino.gif';
 import dinoStable from '../assets/dino-stable.png';
 
 const Ball: React.FC<BallProps> = ({ onCollision, dinoRef }) => {
-  const [position, setPosition] = useState({
-    top: 100,
-    left: window.innerWidth - 800,
+  const [ballState, setBallState] = useState({
+    position: {
+      top: 100,
+      left: window.innerWidth - 800,
+    },
+    velocity: { x: -5, y: 5 },
+    acceleration: { x: 0, y: 0.5 },
   });
-  const [velocity, setVelocity] = useState({ x: -5, y: 5 });
-  const [acceleration, setAcceleration] = useState({ x: 0, y: 0.5 });
 
   const checkCollision = (ballRect: DOMRect, dinoRect: DOMRect) => {
     return (
@@ -19,68 +21,65 @@ const Ball: React.FC<BallProps> = ({ onCollision, dinoRef }) => {
     );
   };
 
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      setVelocity((prev) => ({
-        x: prev.x + acceleration.x,
-        y: prev.y + acceleration.y,
-      }));
-
-      setPosition((prev) => ({
-        top: prev.top + velocity.y,
-        left: prev.left + velocity.x,
-      }));
-
+  const updateBall = () => {
+    setBallState((prevState) => {
+      const { position, velocity, acceleration } = prevState;
+      const newVelocity = {
+        x: velocity.x + acceleration.x * 0.8,
+        y: velocity.y + acceleration.y * 0.8,
+      };
+      const newPosition = {
+        top: position.top + newVelocity.y,
+        left: position.left + newVelocity.x,
+      };
+      // Collision detection with dino
       if (dinoRef.current) {
         const dinoRect = dinoRef.current.getBoundingClientRect();
         const ballRect = {
-          top: position.top,
-          right: position.left + 16,
-          bottom: position.top + 16,
-          left: position.left,
+          top: newPosition.top,
+          right: newPosition.left + 16,
+          bottom: newPosition.top + 16,
+          left: newPosition.left,
         };
-
         if (checkCollision(ballRect, dinoRect)) {
-          setVelocity((prev) => ({ ...prev, y: -Math.abs(prev.y) }));
+          newVelocity.y = -Math.abs(newVelocity.y) * 1.5;
           onCollision();
         }
       }
-
-      if (position.top <= 0) {
-        setVelocity((prev) => ({ ...prev, y: Math.abs(prev.y) }));
+      if (newPosition.top <= 0) {
+        newVelocity.y = -newVelocity.y * 0.8;
+      } else if (newPosition.top >= window.innerHeight - 16) {
+        newPosition.top = window.innerHeight - 16;
+        newVelocity.y = -newVelocity.y * 0.8;
       }
 
-      if (position.top >= window.innerHeight - 16) {
-        setVelocity((prev) => ({ ...prev, y: -Math.abs(prev.y) }));
+      // Collision detection with left and right of the screen
+      if (newPosition.left <= 0 || newPosition.left >= window.innerWidth - 16) {
+        newVelocity.x = -newVelocity.x * 0.8;
       }
+      // give friction to the ball
+      newVelocity.x *= 0.99;
+      newVelocity.y *= 0.99;
 
-      if (position.left <= 0) {
-        setVelocity((prev) => ({ ...prev, x: Math.abs(prev.x) }));
-      }
+      return {
+        position: newPosition,
+        velocity: newVelocity,
+        acceleration,
+      };
+    });
+    requestAnimationFrame(updateBall);
+  };
 
-      if (position.left >= window.innerWidth - 16) {
-        setVelocity((prev) => ({ ...prev, x: -Math.abs(prev.x) }));
-      }
-    }, 20);
-
-    return () => {
-      clearInterval(intervalId);
-    };
-  }, [
-    position.top,
-    position.left,
-    velocity,
-    acceleration,
-    dinoRef,
-    onCollision,
-  ]);
+  useEffect(() => {
+    requestAnimationFrame(updateBall);
+  }, []);
 
   return (
     <div
       className="absolute z-50 h-4 w-4 rounded-full bg-red-500"
       style={{
-        top: `${position.top}px`,
-        left: `${position.left}px`,
+        top: `${ballState.position.top}px`,
+        left: `${ballState.position.left}px`,
       }}
     />
   );
