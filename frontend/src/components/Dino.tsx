@@ -212,6 +212,7 @@ const Dino: React.FC = () => {
   return (
     <div>
       <div
+        ref={dinoRef}
         className="absolute z-50 select-none text-5xl"
         style={{
           top: `${position.top}px`,
